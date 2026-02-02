@@ -12,7 +12,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>module-base</module>
-    <module>module-gui</module>
   </modules>
   <repositories>
     <repository>

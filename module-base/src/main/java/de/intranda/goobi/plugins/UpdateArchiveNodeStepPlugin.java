@@ -37,35 +37,27 @@ import net.xeoh.plugins.base.annotations.PluginImplementation;
 @PluginImplementation
 @Log4j2
 public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
-    
+
     @Getter
     private String title = "intranda_step_update_archive_node";
     @Getter
     private Step step;
-    @Getter
-    private String value;
-    @Getter 
-    private boolean allowTaskFinishButtons;
+
     private String returnPath;
 
     @Override
     public void initialize(Step step, String returnPath) {
         this.returnPath = returnPath;
         this.step = step;
-                
+
         // read parameters from correct block in configuration file
         SubnodeConfiguration myconfig = ConfigPlugins.getProjectAndStepConfig(title, step);
-        value = myconfig.getString("value", "default value"); 
-        allowTaskFinishButtons = myconfig.getBoolean("allowTaskFinishButtons", false);
         log.info("UpdateArchiveNode step plugin initialized");
     }
 
     @Override
     public PluginGuiType getPluginGuiType() {
-        return PluginGuiType.FULL;
-        // return PluginGuiType.PART;
-        // return PluginGuiType.PART_AND_FULL;
-        // return PluginGuiType.NONE;
+        return PluginGuiType.NONE;
     }
 
     @Override
@@ -87,7 +79,7 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
     public String finish() {
         return "/uii" + returnPath;
     }
-    
+
     @Override
     public int getInterfaceVersion() {
         return 0;
@@ -97,7 +89,7 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
     public HashMap<String, StepReturnValue> validate() {
         return null;
     }
-    
+
     @Override
     public boolean execute() {
         PluginReturnValue ret = run();
@@ -108,7 +100,7 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
     public PluginReturnValue run() {
         boolean successful = true;
         // your logic goes here
-        
+
         log.info("UpdateArchiveNode step plugin executed");
         if (!successful) {
             return PluginReturnValue.ERROR;
