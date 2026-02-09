@@ -68,13 +68,13 @@ import ugh.exceptions.UGHException;
 
 @PluginImplementation
 @Log4j2
+@Getter
 public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
 
     private static final long serialVersionUID = -8740716011038434073L;
 
-    @Getter
     private String title = "intranda_step_update_archive_node";
-    @Getter
+
     private Step step;
 
     private Process process;
@@ -206,40 +206,11 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
         if (nodeIdMetadata != null) {
             // link exist, find existing node, update node metadata
 
-            Integer entryId = ArchiveManagementManager.findNodeById(nodeIdNodeName, nodeIdMetadata.getValue());
-
-            if (entryId != null) {
-                log.debug("Found node with ID '{}', update existing node.", nodeIdMetadata.getValue());
-
-                IEadEntry entry = null;
-                for (IEadEntry e : rootElement.getAllNodes()) {
-                    if (entryId.equals(e.getDatabaseId())) {
-                        entry = e;
-                        break;
-                    }
-                }
-
-                NodeInitializer.initEadNodeWithMetadata(entry, config.getConfiguredFields());
-                String fingerprintBeforeImport = entry.getFingerprint();
-                // parse metadata
-
-                // parse metadata
-                entry.updateNodeWithProcessMetadata();
-
-                // save, if metadata was changed
-                entry.calculateFingerprint();
-                String fingerprintAfterImport = entry.getFingerprint();
-                if (!fingerprintBeforeImport.equals(fingerprintAfterImport)) {
-                    ArchiveManagementManager.saveNode(recordGroup.getId(), entry);
-                }
-            } else {
-                // linked entry does not exist, continue as new node
-                log.debug("No node exists with ID '{}', create a new node", nodeIdMetadata.getValue());
-                try {
-                    createNewNode(prefs, docstruct, config, fileType, folderType, recordGroup, rootElement);
-                } catch (IOException e) {
-                    return PluginReturnValue.ERROR;
-                }
+            try {
+                updateExistingNode(prefs, docstruct, config, fileType, folderType, recordGroup, rootElement, nodeIdMetadata);
+            } catch (IOException e) {
+                log.error(e);
+                return PluginReturnValue.ERROR;
             }
 
         } else {
@@ -254,9 +225,44 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
         return PluginReturnValue.FINISH;
     }
 
-    private void createNewNode(Prefs prefs, DocStruct docstruct, ArchiveManagementConfiguration config, INodeType fileType,
-            INodeType folderType,
-            RecordGroup recordGroup, IEadEntry rootElement) throws IOException {
+    public void updateExistingNode(Prefs prefs, DocStruct docstruct, ArchiveManagementConfiguration config, INodeType fileType, INodeType folderType,
+            RecordGroup recordGroup, IEadEntry rootElement, Metadata nodeIdMetadata) throws IOException {
+        Integer entryId = ArchiveManagementManager.findNodeById(nodeIdNodeName, nodeIdMetadata.getValue());
+
+        if (entryId != null) {
+            log.debug("Found node with ID '{}', update existing node.", nodeIdMetadata.getValue());
+
+            IEadEntry entry = null;
+            for (IEadEntry e : rootElement.getAllNodes()) {
+                if (entryId.equals(e.getDatabaseId())) {
+                    entry = e;
+                    break;
+                }
+            }
+
+            NodeInitializer.initEadNodeWithMetadata(entry, config.getConfiguredFields());
+            String fingerprintBeforeImport = entry.getFingerprint();
+            // parse metadata
+
+            // parse metadata
+            entry.updateNodeWithProcessMetadata();
+
+            // save, if metadata was changed
+            entry.calculateFingerprint();
+            String fingerprintAfterImport = entry.getFingerprint();
+            if (!fingerprintBeforeImport.equals(fingerprintAfterImport)) {
+                ArchiveManagementManager.saveNode(recordGroup.getId(), entry);
+            }
+        } else {
+            // linked entry does not exist, continue as new node
+            log.debug("No node exists with ID '{}', create a new node", nodeIdMetadata.getValue());
+            createNewNode(prefs, docstruct, config, fileType, folderType, recordGroup, rootElement);
+        }
+
+    }
+
+    protected IEadEntry createNewNode(Prefs prefs, DocStruct docstruct, ArchiveManagementConfiguration config, INodeType fileType,
+            INodeType folderType, RecordGroup recordGroup, IEadEntry rootElement) throws IOException {
         String parentNodeId = null;
         // find ancestor element
         switch (pluginConfig.getString("/parentType")) {
@@ -368,7 +374,7 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
                         lastAncestorNode = entry;
                     }
                 }
-                break;
+                return lastAncestorNode;
         }
 
         if (StringUtils.isNotBlank(parentNodeId)) {
@@ -418,10 +424,13 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
             entry.calculateFingerprint();
             ArchiveManagementManager.saveNode(recordGroup.getId(), entry);
             ArchiveManagementManager.updateNodeHierarchy(recordGroup.getId(), ancestorNode.getAllNodes());
+
+            return entry;
         }
+        return null;
     }
 
-    private EadEntry createNode(ArchiveManagementConfiguration config, IEadEntry lastAncestorNode, int orderNumber, String identifier) {
+    protected EadEntry createNode(ArchiveManagementConfiguration config, IEadEntry lastAncestorNode, int orderNumber, String identifier) {
         EadEntry entry = new EadEntry(orderNumber, lastAncestorNode.getHierarchy() + 1);
 
         // generate a new internal id
@@ -450,7 +459,7 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
         return entry;
     }
 
-    private void parseMetadata(Prefs prefs, EadEntry entry, DocStruct docstruct) {
+    protected void parseMetadata(Prefs prefs, EadEntry entry, DocStruct docstruct) {
         for (IMetadataField emf : entry.getIdentityStatementAreaList()) {
             if (emf.isGroup()) {
                 importGroupData(prefs, docstruct, emf);
