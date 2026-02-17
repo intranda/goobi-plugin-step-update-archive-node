@@ -21,7 +21,6 @@ package de.intranda.goobi.plugins;
 
 import java.util.HashMap;
 
-import org.goobi.beans.Process;
 import org.goobi.beans.Step;
 import org.goobi.production.enums.PluginGuiType;
 import org.goobi.production.enums.PluginReturnValue;
@@ -44,15 +43,13 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
 
     private Step step;
 
-    private Process process;
-
     private String returnPath;
 
     private CreateNodeHelper cnh;
 
     @Override
     public void initialize(Step step, String returnPath) {
-
+        this.step = step;
         this.returnPath = returnPath;
         cnh = new CreateNodeHelper(step);
         log.trace("UpdateArchiveNode step plugin initialized");
