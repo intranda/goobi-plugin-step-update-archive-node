@@ -6,6 +6,7 @@
 			<arg value="package"/>
 		</exec>
 		<copy file="module-base/target/plugin-step-update-archive-node-base.jar" todir="/opt/digiverso/goobi/plugins/step/" overwrite="true"/>
+        <copy file="module-lib/target/plugin-step-update-archive-node-lib.jar" todir="/opt/digiverso/goobi/plugins/GUI/" overwrite="true"/>		
 	</target>
 
 </project>
