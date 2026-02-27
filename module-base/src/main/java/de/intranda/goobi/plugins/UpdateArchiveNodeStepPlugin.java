@@ -21,7 +21,6 @@ package de.intranda.goobi.plugins;
 
 import java.util.HashMap;
 
-import org.apache.commons.configuration.SubnodeConfiguration;
 import org.goobi.beans.Step;
 import org.goobi.production.enums.PluginGuiType;
 import org.goobi.production.enums.PluginReturnValue;
@@ -29,48 +28,41 @@ import org.goobi.production.enums.PluginType;
 import org.goobi.production.enums.StepReturnValue;
 import org.goobi.production.plugin.interfaces.IStepPluginVersion2;
 
-import de.sub.goobi.config.ConfigPlugins;
 import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import net.xeoh.plugins.base.annotations.PluginImplementation;
 
 @PluginImplementation
 @Log4j2
+@Getter
 public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
-    
-    @Getter
+
+    private static final long serialVersionUID = -8740716011038434073L;
+
     private String title = "intranda_step_update_archive_node";
-    @Getter
+
     private Step step;
-    @Getter
-    private String value;
-    @Getter 
-    private boolean allowTaskFinishButtons;
+
     private String returnPath;
+
+    private CreateNodeHelper cnh;
 
     @Override
     public void initialize(Step step, String returnPath) {
-        this.returnPath = returnPath;
         this.step = step;
-                
-        // read parameters from correct block in configuration file
-        SubnodeConfiguration myconfig = ConfigPlugins.getProjectAndStepConfig(title, step);
-        value = myconfig.getString("value", "default value"); 
-        allowTaskFinishButtons = myconfig.getBoolean("allowTaskFinishButtons", false);
-        log.info("UpdateArchiveNode step plugin initialized");
+        this.returnPath = returnPath;
+        cnh = new CreateNodeHelper(step);
+        log.trace("UpdateArchiveNode step plugin initialized");
     }
 
     @Override
     public PluginGuiType getPluginGuiType() {
-        return PluginGuiType.FULL;
-        // return PluginGuiType.PART;
-        // return PluginGuiType.PART_AND_FULL;
-        // return PluginGuiType.NONE;
+        return PluginGuiType.NONE;
     }
 
     @Override
     public String getPagePath() {
-        return "/uii/plugin_step_update_archive_node.xhtml";
+        return "";
     }
 
     @Override
@@ -87,7 +79,7 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
     public String finish() {
         return "/uii" + returnPath;
     }
-    
+
     @Override
     public int getInterfaceVersion() {
         return 0;
@@ -97,7 +89,7 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
     public HashMap<String, StepReturnValue> validate() {
         return null;
     }
-    
+
     @Override
     public boolean execute() {
         PluginReturnValue ret = run();
@@ -106,13 +98,7 @@ public class UpdateArchiveNodeStepPlugin implements IStepPluginVersion2 {
 
     @Override
     public PluginReturnValue run() {
-        boolean successful = true;
-        // your logic goes here
-        
-        log.info("UpdateArchiveNode step plugin executed");
-        if (!successful) {
-            return PluginReturnValue.ERROR;
-        }
-        return PluginReturnValue.FINISH;
+        return cnh.run();
     }
+
 }
