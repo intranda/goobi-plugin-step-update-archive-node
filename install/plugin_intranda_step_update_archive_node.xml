@@ -5,17 +5,42 @@
           2.) step name matches and project is *
           3.) project name matches and step name is *
           4.) project name and step name are *
-	-->
-    
+    -->
+
     <config>
         <!-- which projects to use for (can be more then one, otherwise use *) -->
         <project>*</project>
         <step>*</step>
-        
-        <!-- sample parameter -->
-        <value>test</value>
-        <!-- display button to finish the task directly from within the entered plugin -->
-        <allowTaskFinishButtons>true</allowTaskFinishButtons>
+
+        <!-- name of the metadata field in the METS file that contains the archive node identifier -->
+        <identifierMetadataField>NodeId</identifierMetadataField>
+
+        <!-- name of the field in the archive node used as identifier -->
+        <identifierNodeField>reference code</identifierNodeField>
+
+        <!-- node type name for branch/folder nodes, default is 'folder' -->
+        <nodeTypeBranch>folder</nodeTypeBranch>
+
+        <!-- node type name for leaf/file nodes, default is 'file' -->
+        <nodeTypeLeaf>file</nodeTypeLeaf>
+
+        <!-- name of the archive to use -->
+        <archive>archiveName</archive>
+
+        <!-- how the parent node is determined: 'fixed', 'metadata' or 'hierarchy' -->
+        <parentType>fixed</parentType>
+
+        <!-- option 1: fixed parent node, optionally per doctype -->
+        <parentNodeId doctype="Monograph">parent_id_123</parentNodeId>
+        <defaultParentNodeId>default_parent_id</defaultParentNodeId>
+
+        <!-- option 2: parent node ID from a metadata field -->
+        <!-- <parentType>metadata</parentType> -->
+        <!-- <parentNodeMetadataName>ParentNodeId</parentNodeMetadataName> -->
+
+        <!-- option 3: build hierarchy from metadata value using a split character -->
+        <!-- <parentType>hierarchy</parentType> -->
+        <!-- <hierarchyMetadataName split="_">ClassificationPath</hierarchyMetadataName> -->
     </config>
 
 </config_plugin>
