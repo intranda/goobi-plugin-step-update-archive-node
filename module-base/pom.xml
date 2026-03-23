@@ -4,7 +4,7 @@
   <parent>
     <groupId>io.goobi.workflow.plugin</groupId>
     <artifactId>plugin-step-update-archive-node</artifactId>
-    <version>26.03-SNAPSHOT</version>
+    <version>${revision}</version>
   </parent>
   <artifactId>plugin-step-update-archive-node-base</artifactId>
   <packaging>jar</packaging>
@@ -12,7 +12,7 @@
     <dependency>
       <groupId>io.goobi.workflow.plugin</groupId>
       <artifactId>plugin-step-update-archive-node-lib</artifactId>
-      <version>26.03-SNAPSHOT</version>
+      <version>${revision}</version>
     </dependency>
   </dependencies>
 </project>
