@@ -60,8 +60,8 @@ Die Konfiguration des Plugins erfolgt in der Datei `plugin_intranda_step_update_
 Parameter                  | Erläuterung
 ---------------------------|------------------------------------
 `identifierMetadataField`  | Name des Metadatenfeldes in der METS-Datei des Vorgangs, das den Identifikator des Archivknotens enthält. Über dieses Feld wird bei erneuter Ausführung der zugehörige Knoten wiedergefunden.
-`identifierNodeField`      | Name des Feldes im Archivknoten, das als Identifikator dient (z.B. `reference code`).
-`nodeTypeBranch`           | Knotentyp für Verzweigungsknoten. Standardwert: `folder`. Wird im Modus `hierarchy` für Zwischenknoten verwendet.
+`identifierNodeField`      | Name des Feldes im Archivknoten, das als Identifikator dient.
+`nodeTypeBranch`           | Knotentyp für Verzweigungsknoten. Standardwert: `folder`. Wird im Modus `hierarchy` für neu erstellte Elternknoten verwendet.
 `nodeTypeLeaf`             | Knotentyp für Blattknoten. Standardwert: `file`. Wird für den endgültigen Knoten verwendet, der die Vorgangsmetadaten enthält.
 `archive`                  | Name des Archivs in der Archivverwaltung, in dem die Knoten erstellt oder aktualisiert werden sollen.
 `parentType`               | Modus zur Bestimmung des Elternknotens. Mögliche Werte: `fixed`, `metadata` oder `hierarchy`. Details siehe unten.
@@ -116,7 +116,7 @@ Der Metadatenwert wird anhand des konfigurierten Trennzeichens (`split`-Attribut
 | 4 | `CR_1_C_St` | Verzweigungsknoten (`folder`) |
 | 5 | `CR_1_C_St_30` | Blattknoten (`file`) |
 
-Für jeden Bestandteil wird geprüft, ob der zugehörige Knoten bereits existiert. Falls ja, wird dieser als Elternknoten für die nächste Ebene verwendet. Falls nein, wird ein neuer Knoten erstellt. Zwischenknoten erhalten den Knotentyp `folder` (Verzweigung), nur der letzte Knoten erhält den Typ `file` (Blatt) und wird mit den Metadaten des Vorgangs befüllt.
+Für jeden Bestandteil wird geprüft, ob der zugehörige Knoten bereits existiert. Falls ja, wird dieser als Elternknoten für die nächste Ebene verwendet. Falls nein, wird ein neuer Knoten erstellt. Die übergeordneten Knoten erhalten den im Feld `nodeTypeBranch` definierten Knotentyp, nur der letzte Knoten erhält den Typ aus dem Feld `nodeTypeLeaf` und wird mit den Metadaten des Vorgangs befüllt.
 
 Die Sortierung neuer Knoten innerhalb des Elternknotens wird dabei wie folgt bestimmt: Ist der aktuelle Bestandteil numerisch, wird er als Positionsnummer verwendet. Andernfalls wird der Knoten am Ende der bestehenden Kindknoten eingefügt.
 
@@ -130,21 +130,13 @@ Falls der referenzierte Knoten nicht mehr existiert, wird stattdessen wie bei ei
 
 
 ## Metadaten-Import
-Beim Import von Metadaten aus dem Vorgang in den Archivknoten werden alle in der Archivkonfiguration definierten Bereiche berücksichtigt:
 
-- Identity Statement Area (Identifikationsbereich)
-- Context Area (Kontextbereich)
-- Content and Structure Area (Inhalts- und Strukturbereich)
-- Access and Use Area (Zugangs- und Nutzungsbereich)
-- Allied Materials Area (Verwandte Materialien)
-- Notes Area (Bemerkungen)
-- Description Control Area (Beschreibungskontrolle)
+Beim Import von Metadaten aus dem Vorgang in den Archivknoten wird das Metadatenmapping aus der Konfigurationsdatei der Archivverwaltung (`plugin_intranda_administration_archive_management.xml`) genutzt. Für jedes konfiguriertes Feld aus der Konfigurationsdatei wird geprüft, ob es dazu Metadaten im Vorgang gibt. Wenn dies der Fall ist, werden alle bestehenden Daten dieses Feldes im aktuellen Knoten entfernt und durch die Daten aus dem Vorgang ersetzt. 
 
-Folgende Metadatentypen werden unterstützt:
+Dabei werden alle Typen von Metadaten unterstützt:
 
 - **Einfache Metadaten**: Textwerte und Normdatenverknüpfungen
 - **Personen**: Vorname, Nachname und Normdatenverknüpfung
 - **Körperschaften**: Hauptname, Unterordnung, Teilbezeichnung und Normdatenverknüpfung
 - **Metadatengruppen**: Komplexe Strukturen mit mehreren Unterfeldern
 
-Das Mapping zwischen den Metadatenfeldern des Vorgangs und den Feldern des Archivknotens wird über die Konfiguration der Archivverwaltung (`plugin-administration-archive-management`) gesteuert.
